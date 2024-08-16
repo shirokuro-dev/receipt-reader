@@ -1,7 +1,7 @@
-import { Table } from "@/types/table";
-import CSVIcon from "@/component/csv-icon";
+import { ITable } from "@/types/table";
+import DownloadIcon from "@/component/icons/download-icon";
 
-export default function CSVDownload({ data }: { data: Table }) {
+export default function CSVDownload({ data }: { data: ITable }) {
     const list = data.list
 
     const arrayToCSV = <T extends Record<string, any>>(array: T[]): string => {
@@ -39,8 +39,6 @@ export default function CSVDownload({ data }: { data: Table }) {
     };
 
     return (
-        <div className="w-full text-right">
-            <button onClick={() => handleDownload()} className="text-white bg-gray-800 hover:bg-gray-900 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2"><CSVIcon />Download Data</button>
-        </div>
+        <button onClick={() => handleDownload()} className="btn btn-primary"><DownloadIcon />CSV</button>
     );
 }

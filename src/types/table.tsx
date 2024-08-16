@@ -12,7 +12,7 @@ interface ItemView {
     total: string
 }
 
-export interface Table {
+export interface ITable {
     total: number,
     tax: number,
     list: Item[]

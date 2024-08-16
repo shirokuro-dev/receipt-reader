@@ -1,8 +1,8 @@
-import { Table } from "@/types/table";
+import { ITable } from "@/types/table";
 
-const formatRupiah = (number:number) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(number);
+export const formatRupiah = (number:number) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(number);
 
-export const parseValue = (data:Table) => {
+export const parseValue = (data:ITable) => {
     const {total, tax, list} = data;
     return {
         total: formatRupiah(total),
