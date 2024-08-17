@@ -9,6 +9,7 @@ export default function AIGenerate({ text, onchange }: { text: string, onchange:
     const [AIerror, setAIerror] = useState(false)
 
     const parseReceipt = async () => {
+      if(!text) return;
         try {
           setAILoading(true);
           const prompt = `
@@ -52,7 +53,7 @@ export default function AIGenerate({ text, onchange }: { text: string, onchange:
       };
 
     return (
-        <button onClick={() => parseReceipt()} className={clsx(AILoading && 'cursor-not-allowed' , "btn btn-primary")}><AiIcon/>{
+        <button onClick={() => parseReceipt()} className={clsx(AILoading && 'cursor-not-allowed' , "btn btn-secondary")}><AiIcon/>{
             AILoading ?
             'Parsing...'
             :
@@ -60,7 +61,7 @@ export default function AIGenerate({ text, onchange }: { text: string, onchange:
             ?
             'Error'
             :
-            'AI'
+            'AI Parser'
         }</button>
     );
 }

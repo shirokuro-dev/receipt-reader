@@ -124,6 +124,7 @@ export const getData = (text: string): ITable => {
     const tax = taxValue ? taxValue[1][0] : 0;
     const totalAndTax = totalAndTaxValue ? totalAndTaxValue[1][0] : total + tax;
     return ({
+        subtotal: total,
         total: totalAndTax,
         tax,
         list: parseToJSON(texts, items, taxValue, totalValue)

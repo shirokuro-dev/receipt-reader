@@ -5,8 +5,8 @@ import { clsx } from 'clsx';
 import Image from 'next/image'
 
 import Loading from '@/component/loading'
-import { ITable, TableView } from '@/types/table'
-import { parseValue } from '@/libraries/parse-value'
+import { ITable, Item, TableView, User, UserView } from '@/types/table'
+import { parseUserValue, parseValue } from '@/libraries/parse-value'
 import TableIcon from '@/component/icons/table-icon';
 import TextIcon from '@/component/icons/text-icon';
 import ArrowIcon from '@/component/icons/arrow';
@@ -24,11 +24,13 @@ export default function Home() {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [ocrResult, setOcrResult] = useState<string>('');
   const [table, setTable] = useState<ITable>({
+    subtotal: 0,
     total: 0,
     tax: 0,
     list: []
   });
   const [tableView, setTableView] = useState<TableView>(parseValue({
+    subtotal: 0,
     total: 0,
     tax: 0,
     list: []
@@ -36,6 +38,8 @@ export default function Home() {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
   const [tab, setTab] = useState<number>(1);
+  const [users, setUsers] = useState<User[]>([])
+  const [usersView, setUsersView] = useState<UserView[]>([])
 
 
   const handleFileChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
@@ -92,6 +96,46 @@ export default function Home() {
 
   const showParsedDataAI = (data: ITable) => {
     setTableView(parseValue(data) as TableView)
+  }
+
+  const addItem = () => {
+    const item:Item = {
+      description: `Barang ${table.list.length + 1}`,
+      total: 0,
+      amount: 0,
+      price: 0,
+    }
+    const newData = {...table, list: [...table.list, item]}
+    setTable(newData)
+    setTableView(parseValue(newData));
+  }
+
+  const deletItem = (index:number) => {
+    let newData = {...table, list: table.list.filter((_, i) => i !== index)}
+    const newUsersData = users.map(user => ({...user, items: user.items.filter((_, i) => i !== index)}))
+    changeTableUser(newUsersData)
+    changeTableView(newData)
+  }
+
+  const changeTableView = (data:ITable) => {
+    const subtotal = data.list.reduce((accumulator, currentValue) => accumulator + currentValue.total, 0)
+    const newTable = {...data, total: subtotal + data.tax, subtotal}
+    setTable(newTable)
+    setTableView(parseValue(newTable));
+    const newData = users.map(user => ({...user, items: user.items.map(item => ({...item, price: newTable.list[item.index].price, total: newTable.list[item.index].price * item.quantity})) }))
+    const taxPercent = newTable.tax / newTable.subtotal;
+    
+    const newDataUser = newData.map(user => {
+      const total = user.items.reduce((accumulator, currentValue) => accumulator + currentValue.total, 0);
+      return {...user, total: total * (1 + taxPercent), tax: total * taxPercent}
+    })
+    changeTableUser(newDataUser)
+  }
+
+  const changeTableUser = (data:User[]) => {
+    setUsers(data)
+    const newData = data.map(item => parseUserValue(item))
+    setUsersView(newData)
   }
 
 
@@ -179,17 +223,17 @@ export default function Home() {
                       <AIGenerate text={ocrResult} onchange={showParsedDataAI} />
                     </div>
                     <div>
-                      <button className='btn btn-primary md:w-auto w-full'><AddIcon/> ITEM</button>
+                      <button className='btn btn-primary md:w-auto w-full' onClick={() => addItem()}><AddIcon/> ITEM</button>
                     </div>
                   </div>
                   {
                     tableView?.list &&
-                    <Table data={tableView} />
+                    <Table view={tableView} data={table} onchange={(e:ITable) => changeTableView(e)} ondelete={(index:number) => deletItem(index)}/>
                   }
                 </div>
             )}
             {tab === 3 && (
-              <SplitBill data={table}/>
+              <SplitBill data={table} users={users} onchange={(e:User[]) => changeTableUser(e)}/>
             )}
           </div>
         </div>
